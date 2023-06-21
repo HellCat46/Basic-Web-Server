@@ -1,3 +1,3 @@
 ```
-cargo run --port=<port>
+cargo run -- --port=<port>
 ```
