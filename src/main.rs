@@ -20,10 +20,17 @@ fn main() {
         let mut stream = request.unwrap();
 
         let path = handle_request(&stream);
-        let (content, status_code) = get_file(path);
-        let response = format!("HTTP/1.1 {}\nContent-Length: {}\n\n {}", status_code, content.len(), content);
+        let (mut content, status_code) = get_file(path);
+        let mut response = format!(
+            "HTTP/1.1 {}\nContent-Length: {}\n\n",
+            status_code,
+            content.len()
+        )
+            .into_bytes();
+        response.append(&mut content);
+        //println!("{response}");
+        stream.write_all(&response).unwrap();
 
-        stream.write_all(response.as_bytes()).unwrap();
     }
 
 }
@@ -47,16 +54,18 @@ fn handle_request(mut stream : &TcpStream) -> String {
     }
 }
 
-fn get_file(path : String) -> (String, String ){
+fn get_file(path : String) -> (Vec<u8>, String ){
     let full_path = "Data".to_string() + &path;
 
-    let content = std::fs::read_to_string(full_path);
+    let content = std::fs::read(full_path);
     match content {
-        Ok(content) => (content, "200 OK".to_string()),
+        Ok(content) =>{
+            (content, "200 OK".to_string())
+        },
         Err(_) => {
-            match std::fs::read_to_string("Data/404.html") {
+            match std::fs::read("../Data/3.html") {
                 Ok(content) => (content, "404 Not Found".to_string()),
-                Err(_) => ("".to_string(), "404 Not Found".to_string())
+                Err(_) => (Vec::from("404 Not Found".as_bytes()), "404 Not Found".to_string())
             }
 
         }
