@@ -11,10 +11,10 @@ fn main() {
 
     for request in listener.incoming() {
         let mut stream = request.unwrap();
-        
+
         let (content, status_code) = get_file(handle_request(&stream));
         let mut response = format!(
-            "HTTP/2 {}\nContent-Length: {}\n\n",
+            "HTTP/1.1 {}\nContent-Length: {}\n\n",
             status_code,
             content.len()
         ).into_bytes();
